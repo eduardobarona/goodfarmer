@@ -3,44 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/png" href="C:\Users\bedua\OneDrive\Desktop\GOODFARMER\ARCHIVOS\goodfarmerPage\logo.png" />
+  <link rel="icon" type="image/png" href="logo.png" />
   <title>GOODFARMER FORMS</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       padding: 20px;
-      min-height: 100vh;
       box-sizing: border-box;
     }
 
-    .logo {
-      width: 300px;
-      max-width: 80%;
-      height: auto;
-      margin-bottom: -30px;
-    }
-
-    h1 {
-      font-size: 3rem;
-      color: #ed1922;
-      text-align: center;
-      margin: 20px 0 40px;
-    }
-
-    .links-container {
+    .container {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-      max-width: 400px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .form-link {
+    .section {
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section h2 {
+      text-align: center;
+      color: #ed1922;
+      margin-bottom: 30px;
+    }
+
+    .form-link, .view-button {
+      display: block;
       text-decoration: none;
       background-color: #ed1922;
       color: white;
@@ -48,43 +48,56 @@
       border-radius: 10px;
       font-size: 1.1rem;
       text-align: center;
+      margin-bottom: 20px;
       transition: background-color 0.3s ease;
     }
 
-    .form-link:hover {
+    .form-link:hover, .view-button:hover {
       background-color: #c2161b;
     }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.2rem;
-      }
+    .logo {
+      display: block;
+      margin: -40px auto;
+      width: 250px;
+      height: auto;
+    }
 
-      .form-link {
-        font-size: 1rem;
-        padding: 12px 18px;
-      }
-
-      .logo {
-        width: 220px;
-        margin-bottom: -20px;
+    @media (max-width: 800px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Logo -->
   <img src="logo.png" alt="GoodFarmer Logo" class="logo" />
 
-  <h1>GOODFARMER FORMS</h1>
+  <h1 style="text-align: center; color: #ed1922;">GOODFARMER FORMS</h1>
 
-  <div class="links-container">
-    <a class="form-link" href="https://forms.gle/YeqZvBsGeH2UKGEX7" target="_blank">DAILY VISITS FORMS</a>
-    <a class="form-link" href="https://script.google.com/macros/s/AKfycbzXhPX7HyQJvnhvoJvQPglVhorLo9uto6SsVUobwCMXJNMcL7fWdcqWA3y2o8Or-_TW/exec" target="_blank">BANANA QUALITY REPORT</a>
-    <a class="form-link" href="https://script.google.com/macros/s/AKfycby4MUN_0DAEelDR_DQUWM3hKCMvpiJfWpkiqrQLz9R-CjiiLlYxUJmt7xYmAoGUUTbd/exec" target="_blank">CLUSTER BANANA QUALITY REPORT</a>
+  <div class="container">
+    <!-- Left Section: Fill Forms -->
+    <div class="section">
+      <h2>FILL FORMS</h2>
+      <a class="form-link" href="https://forms.gle/YeqZvBsGeH2UKGEX7" target="_blank">DAILY VISITS FORM</a>
+      <a class="form-link" href="https://script.google.com/macros/s/AKfycbzXhPX7HyQJvnhvoJvQPglVhorLo9uto6SsVUobwCMXJNMcL7fWdcqWA3y2o8Or-_TW/exec" target="_blank">BANANA QUALITY REPORT</a>
+      <a class="form-link" href="https://script.google.com/macros/s/AKfycby4MUN_0DAEelDR_DQUWM3hKCMvpiJfWpkiqrQLz9R-CjiiLlYxUJmt7xYmAoGUUTbd/exec" target="_blank">CLUSTER BANANA QUALITY REPORT</a>
+      <a class="form-link" href="https://forms.gle/JiU4hAxoxDJZPobo9" target="_blank">SCALES FORM</a>
+    </div>
+
+    <!-- Right Section: View Forms -->
+    <div class="section">
+      <h2>VIEW FORMS</h2>
+      <a class="view-button" href="https://docs.google.com/spreadsheets/d/189gUQqN-tIcTS2FDE9Us1tzn0mFOQunSwW1EU4Xbsak/edit?usp=sharing" target="_blank">VIEW DAILIY VISITS FORM</a>
+      <a class="view-button" href="https://docs.google.com/spreadsheets/d/15qVy0s_7KJ416wFSqRCoYCLiEQBQDqCx88IryBDGCT0/edit?usp=sharing" target="_blank">VIEW BANANA QUALITY REPORT</a>
+      <a class="view-button" href="https://docs.google.com/spreadsheets/d/15qVy0s_7KJ416wFSqRCoYCLiEQBQDqCx88IryBDGCT0/edit?usp=sharing" target="_blank">VIEW CLUSTER BANANA QUALITY REPORT</a>
+      <a class="view-button" href="https://docs.google.com/spreadsheets/d/1lVyFRVebxvMTVVR5qYbSXqPhYUD55b3LFrvoUzxLDg4/edit?usp=sharing" target="_blank">VIEW SCALES FORM</a>
+    </div>
   </div>
 
 </body>
 </html>
+
 
