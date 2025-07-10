@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <title>GOODFARMER - Consulta Finca</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .section {
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ed1922;
+      margin-bottom: 10px;
+    }
+
+    .logo {
+      display: block;
+      margin: -40px auto 10px;
+      width: 250px;
+      height: auto;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #ed1922;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #c2161b;
+    }
+
+    pre {
+      background-color: #f0f0f0;
+      padding: 20px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-top: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 600px) {
+      .section {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <img src="logo.png" alt="GoodFarmer Logo" class="logo" />
+
+  <h1>GOODFARMER - FARM QUALITY PROBLEMS</h1>
+
+  <div class="container">
+    <div class="section">
+      <form id="formFinca">
+          <label for="farmLabel">FARM:</label>
+          <select id="farm" name="farm" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+
+              <!-- AGRO FRESH -->
+              <option value="PEPITA_AGRO_FRESH">PEPITA - AGRO FRESH</option>
+
+              <!-- ANDRADE COMEX -->
+              <option value="LA_REVESA_ANDRADE_COMEX">LA REVESA - ANDRADE COMEX</option>
+              <option value="SEGUNDO_MIGUEL_ANDRADE_COMEX">SEGUNDO MIGUEL - ANDRADE COMEX</option>
+
+              <!-- ARQUEOL -->
+              <option value="SAN_JOSÉ_ARQUEOL">SAN JOSÉ - ARQUEOL</option>
+
+              <!-- BANAVAL -->
+              <option value="ENMITA_DEL_ROCIO_BANAVAL">ENMITA DEL ROCIO - BANAVAL</option>
+
+              <!-- BAGATOCORP -->
+              <option value="EL_PORVENIR_BAGATOCORP">EL PORVENIR - BAGATOCORP</option>
+              <option value="GUARUMAL_2_BAGATOCORP">GUARUMAL 2 - BAGATOCORP</option>
+              <option value="LA_SABANA_BAGATOCORP">LA SABANA - BAGATOCORP</option>
+              <option value="CARMITA_BAGATOCORP">CARMITA - BAGATOCORP</option>
+              <option value="REINA_DEL_CISNE_BAGATOCORP">REINA DEL CISNE - BAGATOCORP</option>
+
+              <!-- DELIFRUT -->
+              <option value="DELI_3_DELIFRUT">DELI 3 - DELIFRUT</option>
+              <option value="DELI_5_DELIFRUT">DELI 5 - DELIFRUT</option>
+              <option value="DELI_8_DELIFRUT">DELI 8 - DELIFRUT</option>
+
+              <!-- DIXIMAT -->
+              <option value="SAN_JUAN_DIXIMAT">SAN JUAN - DIXIMAT</option>
+
+              <!-- DUREXPORTA -->
+              <option value="DOS_HERMANAS_DUREXPORTA">DOS HERMANAS - DUREXPORTA</option>
+              <option value="KRAPP_DUREXPORTA">KRAPP - DUREXPORTA</option>
+              <option value="LAS_PALMAS_DUREXPORTA">LAS PALMAS - DUREXPORTA</option>
+              <option value="SAN_MIGUEL_DUREXPORTA">SAN MIGUEL - DUREXPORTA</option>
+              <option value="TADURA_DUREXPORTA">TADURA - DUREXPORTA</option>
+              <option value="TADURA_DUREXPORTA">TRANSVAL 1 - DUREXPORTA</option>
+              <option value="ZARAGOZA_DUREXPORTA">ZARAGOZA - DUREXPORTA</option>
+
+              <!-- EARTH FRUCTIFERA -->
+              <option value="RANCHO_LINDO2_EARTHFRUCTIFERA">RANCHO LINDO 2 - EARTH FRUCTIFERA</option>
+              <option value="CUATRO_MANGAS2_EARTHFRUCTIFERA">CUATRO MANGAS 2 - EARTH FRUCTIFERA</option>
+
+              <!-- FRUDONMAR -->
+              <option value="BUENA_VENTURA_FRUDONMAR">BUENA VENTURA - FRUDONMAR</option>
+
+              <!-- FANALBA -->
+              <option value="PEPA_ORO_FANALBA">PEPA DE ORO - FANALBA</option>
+
+              <!-- FRUTADELI -->
+              <option value="AGRICOLA_VIRGINIA_FRUTADELI">AGRICOLA VIRGINIA - FRUTADELI</option>
+              <option value="ALEJANDRA_FRUTADELI">ALEJANDRA - FRUTADELI</option>
+              <option value="ARMANDYJR_FRUTADELI">ARMANDY JUNIOR - FRUTADELI</option>
+              <option value="ARMONIA_FRUTADELI">ARMONIA - FRUTADELI</option>
+              <option value="BANAMAR_FRUTADELI">BANAMAR - FRUTADELI</option>
+              <option value="BEATA_FRUTADELI">BEATA - FRUTADELI</option>
+              <option value="BONANZA_FRUTADELI">BONANZA - FRUTADELI</option>
+              <option value="DESBROCE_FRUTADELI">DESBROCE - FRUTADELI</option>
+              <option value="DONFEDE_FRUTADELI">DON FEDE - FRUTADELI</option>
+              <option value="MANUEL_FRUTADELI">DON MANUEL - FRUTADELI</option>
+              <option value="DOÑAMIRIAM_FRUTADELI">DOÑA MIRIAM - FRUTADELI</option>
+              <option value="DROMA_FRUTADELI">DROMA - FRUTADELI</option>
+              <option value="ELMOROCHO_FRUTADELI">EL MOROCHO - FRUTADELI</option>
+              <option value="ELPORVENIR_FRUTADELI">EL PORVENIR - FRUTADELI</option>
+              <option value="ZAPOTE1_FRUTADELI">EL ZAPOTE1 - FRUTADELI</option>
+              <option value="ZAPOTE2_FRUTADELI">EL ZAPOTE2 - FRUTADELI</option>
+              <option value="ZAPOTE3_FRUTADELI">EL ZAPOTE3 - FRUTADELI</option>
+              <option value="ZAPOTE4_FRUTADELI">EL ZAPOTE4 - FRUTADELI</option>
+              <option value="FLORIDA_FRUTADELI">FLORIDA - FRUTADELI</option>
+              <option value="GUAYABO_FRUTADELI">GUAYABO - FRUTADELI</option>
+              <option value="GUAYABO2_FRUTADELI">GUAYABO 2 - FRUTADELI</option>
+              <option value="INMACULADA1_FRUTADELI">INMACULADA 1 - FRUTADELI</option>
+              <option value="INMACULADA3_FRUTADELI">INMACULADA 3 - FRUTADELI</option>
+              <option value="INMACULADA4_FRUTADELI">INMACULADA 4 - FRUTADELI</option>
+              <option value="JENNYMARCELA_FRUTADELI">JENNY MARCELA - FRUTADELI</option>
+              <option value="JUANESTEBAN_FRUTADELI">JUAN ESTEBAN - FRUTADELI</option>
+              <option value="KINGRANCHITOL_FRUTADELI">KING RANCHITO - FRUTADELI</option>
+              <option value="LAARMONIA_FRUTADELI">LA ARMONIA - FRUTADELI</option>
+              <option value="CLEMENCIA_FRUTADELI">LA CLEMENCIA - FRUTADELI</option>
+              <option value="GEMA_FRUTADELI">LA GEMA - FRUTADELI</option>
+              <option value="MARAVILLA_FRUTADELI">LA MARAVILLA - FRUTADELI</option>
+              <option value="PAZ_FRUTADELI">LA PAZ - FRUTADELI</option>
+              <option value="PALMAS_FRUTADELI">LAS PALMAS - FRUTADELI</option>
+              <option value="LORENA2_FRUTADELI">LORENA 2 - FRUTADELI</option>
+              <option value="ANGELES_FRUTADELI">LOS ANGELES - FRUTADELI</option>
+              <option value="LOTEPALADINES_FRUTADELI">LOTE PALADINES - FRUTADELI</option>
+              <option value="MARIAESPERANZA_FRUTADELI">MARIA ESPERANZA - FRUTADELI</option>
+              <option value="MARIAFERNANDA_FRUTADELI">MARIA FERNANDA - FRUTADELI</option>
+              <option value="MARIALUISA_FRUTADELI">MARIA LUISA - FRUTADELI</option>
+              <option value="MERCEDES_FRUTADELI">MERCEDES - FRUTADELI</option>
+              <option value="NANCY_FRUTADELI">NANCY - FRUTADELI</option>
+              <option value="NORMACRISTINA1_FRUTADELI">NORMA CRISTINA 1 - FRUTADELI</option>
+              <option value="OROVERDE_FRUTADELI">ORO VERDE - FRUTADELI</option>
+              <option value="PAJAL_FRUTADELI">PAJAL - FRUTADELI</option>
+              <option value="PECHICHE_FRUTADELI">PECHICHE - FRUTADELI</option>
+              <option value="PRINCESABANANA1_FRUTADELI">PRINCESA BANANA 1 - FRUTADELI</option>
+              <option value="PRINCESABANANA2_FRUTADELI">PRINCESA BANANA 2 - FRUTADELI</option>
+              <option value="PRINCESABANANA3_FRUTADELI">PRINCESA BANANA 3 - FRUTADELI</option>
+              <option value="PRINCESABANANA4_FRUTADELI">PRINCESA BANANA 4 - FRUTADELI</option>
+              <option value="REINACISNE_FRUTADELI">REINA DEL CISNE - FRUTADELI</option>
+              <option value="ROSITA_FRUTADELI">ROSITA - FRUTADELI</option>
+              <option value="SANANDRES_FRUTADELI">SAN ANDRES - FRUTADELI</option>
+              <option value="SANANTONIO_FRUTADELI">SAN ANTONIO - FRUTADELI</option>
+              <option value="SANFELIPE_FRUTADELI">SAN FELIPE - FRUTADELI</option>
+              <option value="SANGERMAN_FRUTADELI">SAN GERMAN - FRUTADELI</option>
+              <option value="SANGERMAN1_FRUTADELI">SAN GERMAN 1 - FRUTADELI</option>
+              <option value="SANGERMAN2_FRUTADELI">SAN GERMAN 2 - FRUTADELI</option>
+              <option value="SANJOSE_FRUTADELI">SAN JOSE - FRUTADELI</option>
+              <option value="SANJOSETOMATAL_FRUTADELI">SAN JOSE (TOMATAL) - FRUTADELI</option>
+              <option value="SANJUAN_FRUTADELI">SAN JUAN - FRUTADELI</option>
+              <option value="SANMIGUEL_FRUTADELI">SAN MIGUEL - FRUTADELI</option>
+              <option value="SANSEBASTIAN_FRUTADELI">SAN SEBASTIAN - FRUTADELI</option>
+              <option value="SITIONUEVO_FRUTADELI">SITIO NUEVO - FRUTADELI</option>
+              <option value="TRANSVAL1_FRUTADELI">TRANSVAL1 - FRUTADELI</option>
+              <option value="VICTORIA_FRUTADELI">VICTORIA - FRUTADELI</option>
+              <option value="YOLANDAPILAR_FRUTADELI">YOLANDA DEL PILAR - FRUTADELI</option>
+
+              <!-- FRESKBANA -->
+              <option value="DIAMANTE_FRESKBANANA">DIAMANTE - FRESKBANA</option>
+              <option value="EL_CARMEN_FRESKBANANA">EL CARMEN - FRESKBANA</option>
+              <option value="ISABELLA_2_FRESKBANANA">ISABELLA 2 - FRESKBANA</option>
+              <option value="ISABELLA_1_FRESKBANANA">ISABELLA 1 - FRESKBANA</option>
+              <option value="LA_GEMA_FRESKBANANA">LA GEMA - FRESKBANA</option>
+              <option value="NARANJO_CHICO_FRESKBANANA">NARANJO CHICO - FRESKBANA</option>
+              <option value="PRINCESA_BANANA_1_FRESKBANANA">PRINCESA BANANA 1 - FRESKBANA</option>
+              <option value="PRINCESA_BANANA_3_FRESKBANANA">PRINCESA BANANA 3 - FRESKBANA</option>
+              <option value="PRINCESA_BANANA_4_FRESKBANANA">PRINCESA BANANA 4 - FRESKBANA</option>
+              <option value="SANTA_MARIANA_FRESKBANANA">SANTA MARIANA - FRESKBANA</option>
+              <option value="SANTA_TERESITA_2_FRESKBANANA">SANTA TERESITA 2 - FRESKBANA</option>
+              <option value="SAN_EDUARDO_1_FRESKBANANA">SAN EDUARDO 1 - FRESKBANA</option>
+              <option value="SAN_LUIS_FRESKBANANA">SAN LUIS - FRESKBANA</option>
+
+              <!-- GREEN EXPRESS -->
+              <option value="GLENDA_CECILIA_GREEN_EXPRESS">GLENDA CECILIA - GREEN EXPRESS</option>
+              <option value="MARIA_DEL_CISNE_GREEN_EXPRESS">MARIA DEL CISNE - GREEN EXPRESS</option>
+              <option value="SAN_CARLOS_GREEN_EXPRESS">SAN CARLOS - GREEN EXPRESS</option>
+              <option value="SAN_JOSE_GREEN_EXPRESS">SAN JOSE - GREEN EXPRESS</option>
+
+              <!-- INTERBANANA -->
+              <option value="NEXT_GUINEA_INTERBANANA">NEXT GUINEA - INTERBANANA</option>
+              <option value="RIO_VERDE_2_INTERBANANA">RÍO VERDE 2 - INTERBANANA</option>
+              <option value="TRANQUILIDAD_INTERBANANA">TRANQUILIDAD - INTERBANANA</option>
+              <option value="WEST_BANANA_INTERBANANA">WEST BANANA - INTERBANANA</option>
+
+              <!-- JORCORP -->
+              <option value="MIRAFLORES_JORCORP">MIRA FLORES - JORCORP</option>
+              <option value="CIRUELO_1_JORCORP">CIRUELO 1 - JORCORP</option>
+              <option value="DON_ELOY_JORCORP">DON ELOY - JORCORP</option>
+              <option value="GUADALUPE_JORCORP">GUADALUPE - JORCORP</option>
+              <option value="LAURITA_JORCORP">LAURITA - JORCORP</option>
+              <option value="MARGARITA_JORCORP">MARGARITA - JORCORP</option>
+              <option value="PLAYA_GRANDE_JORCORP">PLAYA GRANDE - JORCORP</option>
+              <option value="ELPRIMOR_JORCORP">EL PRIMOR - JORCORP</option>
+              <option value="ROSAANDREA_JORCORP">ROSA ANDREA - JORCORP</option>
+              <option value="SANHUMBERTO_JORCORP">SAN HUMBERTO - JORCORP</option>
+              <option value="VICTORIA2_JORCORP">VICTORIA 2 - JORCORP</option>
+              <option value="VICTORIA3_JORCORP">VICTORIA 3 - JORCORP</option>
+              <option value="VICTORIACHAPULO_JORCORP">VICTORIA CHAPULO - JORCORP</option>
+              <option value="VICTORIACHAPULO3_JORCORP">VICTORIA CHAPULO 3 - JORCORP</option>
+
+              <!-- LATBIO -->
+              <option value="PEREZ_QUIÑONEZ_LATBIO">PEREZ QUIÑONEZ - LATBIO</option>
+
+              <!-- LYRAEXPORT -->
+              <option value="ALEJANDRA_LYRAEXPORT">ALEJANDRA - LYRAEXPORT</option>
+              <option value="BENJAMIN1_LYRAEXPORT">BENJAMIN 1 - LYRAEXPORT</option>
+              <option value="BENJAMIN2_LYRAEXPORT">BENJAMIN 2 - LYRAEXPORT</option>
+              <option value="DELIAGRACE_LYRAEXPORT">DELIA GRACE - LYRAEXPORT</option>
+              <option value="EVAMARIA_LYRAEXPORT">EVA MARIA - LYRAEXPORT</option>
+              <option value="LEONARDO_LYRAEXPORT">LEONARDO - LYRAEXPORT</option>
+              <option value="MARGARITA_LYRAEXPORT">MARGARITA - LYRAEXPORT</option>
+              <option value="MARIAGRACIA_LYRAEXPORT">MARIA GRACIA - LYRAEXPORT</option>
+              <option value="MARTINIGNACIO_LYRAEXPORT">MARTIN IGNACIO - LYRAEXPORT</option>
+              <option value="SANALBERTO_LYRAEXPORT">SAN ALBERTO - LYRAEXPORT</option>
+              <option value="SANALBERTO2_LYRAEXPORT">SAN ALBERTO 2 - LYRAEXPORT</option>
+              <option value="SANANTONIO_LYRAEXPORT">SAN ANTONIO - LYRAEXPORT</option>
+              <option value="TOMAS_LYRAEXPORT">TOMAS - LYRAEXPORT</option>
+
+              <!-- LUDERSON -->
+              <option value="DONALEJO_LUDERSON">DON ALEJO - LUDERSON</option>
+              <option value="DONPATRICIO_LUDERSON">DON PATRICIO - LUDERSON</option>
+              <option value="MARIAINES_LUDERSON">MARIA INES - LUDERSON</option>
+              <option value="OMERCOVIC_LUDERSON">OMERCOVIC - LUDERSON</option>
+
+              <!-- MARPLANTIS -->
+              <option value="MATANEGRO_MARPLANTIS">MATANEGRO - MARPLANTIS</option>
+              <option value="COLON1_MARPLANTIS">COLON 1 - MARPLANTIS</option>
+              <option value="COLON2_MARPLANTIS">COLON 2 - MARPLANTIS</option>
+              <option value="SARITA_MARPLANTIS">SARITA - MARPLANTIS</option>
+
+              <!-- MENDOEXPORT -->
+              <option value="JUANADEORO_MENDOEXPORT">JUANA DE ORO - MENDOEXPORT</option>
+              <option value="MANAMARIO_MENDOEXPORT">MANA MARIO - MENDOEXPORT</option>
+              <option value="MARIAMARIA_MENDOEXPORT">MARIA MARIA - MENDOEXPORT</option>
+              <option value="PAREDESA_MENDOEXPORT">PAREDESA - MENDOEXPORT</option>
+              <option value="SITIONUEVO_MENDOEXPORT">SITIO NUEVO - MENDOEXPORT</option>
+              <option value="LAAURORA_MENDOEXPORT">LA AURORA - MENDOEXPORT</option>
+              <option value="LUCIANITA_MENDOEXPORT">LUCIANITA - MENDOEXPORT</option>
+              <option value="ANGELABEATRIZ_MENDOEXPORT">ANGELA BEATRIZ - MENDOEXPORT</option>
+              <option value="DOSHERMANAS_MENDOEXPORT">DOS HERMANAS - MENDOEXPORT</option>
+              <option value="FORTALEZA_MENDOEXPORT">FORTALEZA - MENDOEXPORT</option>
+              <option value="GRACIASADIOS2_MENDOEXPORT">GRACIAS A DIOS 2 - MENDOEXPORT</option>
+              <option value="ILINKATAMARA_MENDOEXPORT">ILINKA TAMARA - MENDOEXPORT</option>
+              <option value="MATHIAS_MENDOEXPORT">MATHIAS - MENDOEXPORT</option>
+              <option value="SANLORENZO_MENDOEXPORT">SAN LORENZO - MENDOEXPORT</option>
+              <option value="TIMBIRIN_MENDOEXPORT">TIMBIRIN - MENDOEXPORT</option>
+              <option value="NOLOPENSE_MENDOEXPORT">NO LO PENSE - MENDOEXPORT</option>
+              <option value="TRANSVAL1_MENDOEXPORT">TRANSVAL 1 - MENDOEXPORT</option>
+
+              <!-- OBSA -->
+              <option value="PIRULITA_OBSA">PIRULITA - OBSA</option>
+
+              <!-- PALMAR -->
+              <option value="CALICHANA_PALMAR">CALICHANA - PALMAR</option>
+              <option value="DOÑA_JENNY_PALMAR">DOÑA JENNY - PALMAR</option>
+              <option value="DON_EUCLIDES_PALMAR">DON EUCLIDES - PALMAR</option>
+              <option value="EFREN_PASTOR_PALMAR">EFREN PASTOR - PALMAR</option>
+              <option value="ELPORVENIR_PALMAR">EL PORVENIR - PALMAR</option>
+              <option value="JENNY_PAULETTE_PALMAR">JENNY PAULETTE - PALMAR</option>
+              <option value="REGALITO_PALMAR">REGALITO - PALMAR</option>
+              <option value="SAN_ENRIQUE_PALMAR">SAN ENRIQUE - PALMAR</option>
+              <option value="BELLA_ISLA_PALMAR">BELLA ISLA - PALMAR</option>
+              <option value="SAN_JORGE_PALMAR">SAN JORGE - PALMAR</option>
+              <option value="EL_TESORO_PALMAR">EL TESORO - PALMAR</option>
+              <option value="ENMA_VIOLETA_PALMAR">ENMA VIOLETA - PALMAR</option>
+              <option value="ISAIAS_PALMAR">ISAIAS - PALMAR</option>
+              <option value="JUAN_JOSÉ_PALMAR">JUAN JOSÉ - PALMAR</option>
+              <option value="LORENITA_PALMAR">LORENITA - PALMAR</option>
+              <option value="LUZ_MARINA_PALMAR">LUZ MARINA - PALMAR</option>
+              <option value="MARIA_ISABEL_PALMAR">MARIA ISABEL - PALMAR</option>
+              <option value="MORELLA1_PALMAR">MORELLA 1 - PALMAR</option>
+              <option value="MORELLA2_PALMAR">MORELLA 2 - PALMAR</option>
+              <option value="RANCHO_LETHFED_PALMAR">RANCHO LETHFED - PALMAR</option>
+              <option value="SAN_JUAN_PALMAR">SAN JUAN - PALMAR</option>
+              <option value="SITIO_NUEVO_PALMAR">SITIO NUEVO - PALMAR</option>
+              <option value="SAN_JOSE_PALMAR">SAN JOSE - PALMAR</option>
+              <option value="SANTARITA_PALMAR">SANTA RITA - PALMAR</option>
+              <option value="CERRO_GUSANO_PALMAR">CERRO GUSANO - PALMAR</option>
+              <option value="LA_ISLA_PALMAR">LA ISLA - PALMAR</option>
+              <option value="RANCHO_GRANDE_PALMAR">RANCHO GRANDE - PALMAR</option>
+              <option value="SANTA_CLARA_PALMAR">SANTA CLARA - PALMAR</option>
+              <option value="VINCEÑA_PALMAR">VINCEÑA - PALMAR</option>
+              <option value="XAVIER_EUCLIDES_PALMAR">XAVIER EUCLIDES - PALMAR</option>
+              <option value="LA_AURORA_PALMAR">LA AURORA - PALMAR</option>
+
+              <!-- PIÑAS RICAS -->
+              <option value="BUENOSAIRES4_PINASRICAS">BUENOS AIRES 4 - PIÑAS RICAS</option>
+              <option value="CEDRALES_PINASRICAS">CEDRALES - PIÑAS RICAS</option>
+              <option value="ELDORADO_PINASRICAS">EL DORADO - PIÑAS RICAS</option>
+              <option value="ELGARZAL_PINASRICAS">EL GARZAL - PIÑAS RICAS</option>
+              <option value="ILANA_PINASRICAS">ILANA - PIÑAS RICAS</option>
+              <option value="IRENE2_PINASRICAS">IRENE 2 - PIÑAS RICAS</option>
+              <option value="LAESMERALDA_PINASRICAS">LA ESMERALDA - PIÑAS RICAS</option>
+              <option value="LALUZ_PINASRICAS">LA LUZ - PIÑAS RICAS</option>
+              <option value="LAVIRGEN_PINASRICAS">LA VIRGEN - PIÑAS RICAS</option>
+              <option value="LAURITA_PINASRICAS">LAURITA - PIÑAS RICAS</option>
+              <option value="MARAVILLA_PINASRICAS">MARAVILLA - PIÑAS RICAS</option>
+              <option value="TIERRA_VERDE_PINASRICAS">TIERRA VERDE - PIÑAS RICAS</option>
+              <option value="TIJUCA_PINASRICAS">TIJUCA - PIÑAS RICAS</option>
+              <option value="PEPADEORO_PINASRICAS">PACIFICA - PIÑAS RICAS</option>
+              <option value="PEPADEORO_PINASRICAS">PEPA DE ORO - PIÑAS RICAS</option>
+              <option value="PEPITA_PINASRICAS">PEPITA - PIÑAS RICAS</option>
+              <option value="SANTAIRMA_PINASRICAS">SANTA IRMA - PIÑAS RICAS</option>
+              <option value="VILMITA_PINASRICAS">VILMITA - PIÑAS RICAS</option>
+              
+
+              <!-- RUFORCORP -->
+              <option value="BEATA_RUFORCORP">BEATA - RUFORCORP</option>
+
+              <!-- SUMIFRU -->
+              <option value="MANO_DE_DIOS_SUMIFRUT">MANO DE DIOS - SUMIFRU</option>
+              <option value="SAN_JORGE_SUMIFRUT">SAN JORGE - SUMIFRU</option>
+              <option value="SAN_LUIS_SUMIFRUT">SAN LUIS - SUMIFRU</option>
+              <option value="SAN_MARCOS_2_SUMIFRUT">SAN MARCOS 2 - SUMIFRU</option>
+              <option value="CLEMENCIA_SUMIFRUT">CLEMENCIA - SUMIFRU</option>
+              <option value="DOÑA_LAURA_SUMIFRUT">DOÑA LAURA - SUMIFRU</option>
+              <option value="DOÑA_LUISA_SUMIFRUT">DOÑA LUISA - SUMIFRU</option>
+              <option value="LA_SUERTE_1_SUMIFRUT">LA SUERTE 1 - SUMIFRU</option>
+              <option value="LA_SUERTE_2_SUMIFRUT">LA SUERTE 2 - SUMIFRU</option>
+              <option value="LAS_MERCEDES_SUMIFRUT">MERCEDES - SUMIFRU</option>
+              <option value="MATILDE_SUMIFRUT">MATILDE - SUMIFRU</option>
+              <option value="SAN_MARCOS_1_SUMIFRUT">SAN MARCOS 1 - SUMIFRU</option>
+              <option value="MERCEDES_SUMIFRUT">MERCEDES - SUMIFRU</option>
+              <option value="CLAUDIA_MARIA_SUMIFRUT">CLAUDIA MARIA - SUMIFRU</option>
+              <option value="SIGAL_SUMIFRUT">SIGAL - SUMIFRU</option>
+              <option value="MARIA_FERNANDA_SUMIFRUT">MARIA FERNANDA - SUMIFRU</option>
+              <option value="MANOS_DE_DIOS_SUMIFRUT">MANOS DE DIOS - SUMIFRU</option>
+              <option value="TRIPLE_A_SUMIFRUT">TRIPLE A - SUMIFRU</option>
+              <option value="SOLEDAD_SUMIFRUT">SOLEDAD - SUMIFRU</option>
+              <option value="CAROLINA_SUMIFRUT">CAROLINA - SUMIFRU</option>
+          </select>
+        <button type="submit">Analizar</button>
+      </form>
+
+      <pre id="resultado"></pre>
+    </div>
+  </div>
+
+  <script>
+
+   const form = document.getElementById('formFinca');
+const resultado = document.getElementById('resultado');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const selectFarm = document.getElementById("farm");
+  if (!selectFarm) {
+    resultado.textContent = "Error: no se encontró el select con id 'farm'";
+    return;
+  }
+
+  // Obtiene el texto seleccionado, no el value
+  const finca = selectFarm.options[selectFarm.selectedIndex].text.trim();
+  if (!finca) {
+    resultado.textContent = "Por favor selecciona una finca";
+    return;
+  }
+
+  resultado.textContent = 'Consultando...';
+
+  try {
+    const url = `https://eduardobarona14.pythonanywhere.com/analizar?finca=${encodeURIComponent(finca)}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      resultado.textContent = `Error: ${response.status} ${response.statusText}`;
+      return;
+    }
+    const texto = await response.text();
+    resultado.textContent = texto;
+  } catch (error) {
+    resultado.textContent = 'Error en la consulta: ' + error.message;
+  }
+});
+
+  
+
+
+  </script>
+
+</body>
+</html>
