@@ -9,6 +9,13 @@
       margin: 0;
       padding: 0;
       height: 100%;
+      overflow: hidden; /* oculta scroll de la página */
+    }
+
+    .contenedor {
+      position: relative;
+      width: 100%;
+      height: 100%;
     }
 
     iframe {
@@ -16,12 +23,29 @@
       height: 100%;
       border: none;
     }
+
+    /* Cuadro blanco para tapar las flechas/fechas */
+    .tapa {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px; /* ajusta según la altura de la barra de Power BI */
+      background-color: white;
+      z-index: 10; /* se asegura que esté encima del iframe */
+    }
   </style>
 </head>
 <body>
-  <iframe title="REPORT_WEEK_ALL3"
-    src="https://app.powerbi.com/view?r=eyJrIjoiNmNmZDY1NzUtZGM0Zi00ZDNlLTllMGYtZTYzZWEwNjg1ZTcyIiwidCI6ImI3YWY4Y2FmLTgzZDgtNDY0NC04NWFlLTMxN2M1NDUyMjNjMSIsImMiOjR9"
-    allowFullScreen="true">
-  </iframe>
+  <div class="contenedor">
+    <iframe 
+      title="REPORT_WEEK_ALL3" 
+      src="https://app.powerbi.com/view?r=eyJrIjoiNmNmZDY1NzUtZGM0Zi00ZDNlLTllMGYtZTYzZWEwNjg1ZTcyIiwidCI6ImI3YWY4Y2FmLTgzZDgtNDY0NC04NWFlLTMxN2M1NDUyMjNjMSIsImMiOjR9" 
+      allowfullscreen>
+    </iframe>
+
+    <!-- Cuadro blanco encima de las flechas/fechas -->
+    <div class="tapa"></div>
+  </div>
 </body>
 </html>
