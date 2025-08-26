@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <button class="return-button" onclick="history.back()">
+    ← RETURN
+    </button>
+
+  <h2></h2>
   <link rel="icon" type="image/png" href="logo.png" />
   <title>GOODFARMER - Farm Lookup</title>
   <style>
@@ -265,7 +270,7 @@
     <div class="section">
   <img src="logo.png" alt="GoodFarmer Logo" class="logo" />
 
-  <h1>GOODFARMER - FARM LOOKUP</h1>
+  <h1>FARMS INFO</h1>
       
       <form id="farmForm">
         <label for="farm">SELECT FARM:</label>
@@ -469,14 +474,18 @@
     }
 
     function updateSelectDisplay() {
-      if (selectedFarmIndex !== null) {
-        selectedText.textContent = farmsData[selectedFarmIndex].name;
-        submitBtn.disabled = false;
-      } else {
-        selectedText.textContent = farmsData.length > 0 ? 'Select a farm...' : 'Loading farms...';
-        submitBtn.disabled = true;
-      }
+        if (selectedFarmIndex !== null) {
+            const farm = farmsData[selectedFarmIndex];
+            // Tomar solo la primera parte de farm.name
+            const farmNameClean = farm.name.split(' - ')[0];
+            selectedText.textContent = `${farm.supplier || 'N/A'} - ${farm.farmCode || 'N/A'} - ${farmNameClean}`;
+            submitBtn.disabled = false;
+        } else {
+            selectedText.textContent = farmsData.length > 0 ? 'Select a farm...' : 'Loading farms...';
+            submitBtn.disabled = true;
+        }
     }
+
 
     function populateOptions() {
       optionsList.innerHTML = '';
@@ -484,15 +493,18 @@
       farmsData.forEach((farm, index) => {
         const option = document.createElement('div');
         option.className = 'option';
-        option.textContent = farm.name;
+        
+        const farmNameClean = farm.name.split(' - ')[0];
+        option.textContent = `${farm.supplier || 'N/A'} - ${farm.farmCode || 'N/A'} - ${farmNameClean}`;
+        
         option.dataset.index = index;
         
         option.addEventListener('click', () => {
-          selectFarm(index);
+            selectFarm(index);
         });
         
         optionsList.appendChild(option);
-      });
+        });
     }
 
     function selectFarm(index) {
@@ -606,67 +618,44 @@
     });
 
     function showFarmInfo(farm) {
-      // Crear el contenedor
       const farmInfoDiv = document.createElement('div');
       farmInfoDiv.className = 'farm-info';
-      
-      // Función para detectar si es una coordenada y crear enlace a Google Maps
+
+      // NUEVA versión de createLocationElement
       function createLocationElement(location) {
         if (!location || location === 'N/A') {
           return document.createTextNode('N/A');
         }
-        
-        // Detectar si contiene coordenadas (números con comas/puntos decimales y posibles negativos)
-        const coordPattern = /^(-?\d+\.?\d*),?\s*(-?\d+\.?\d*)$/;
-        const match = location.trim().match(coordPattern);
-        
-        if (match) {
-          const lat = parseFloat(match[1]);
-          const lng = parseFloat(match[2]);
-          
-          // Validar que las coordenadas sean válidas
-          if (Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-            const link = document.createElement('a');
-            link.href = `https://www.google.com/maps?q=${lat},${lng}`;
-            link.target = '_blank';
-            link.style.color = '#ed1922';
-            link.style.textDecoration = 'underline';
-            link.style.cursor = 'pointer';
-            link.title = 'Abrir en Google Maps';
-            link.textContent = location;
-            
-            // Agregar evento hover
-            link.addEventListener('mouseenter', () => {
-              link.style.color = '#c2161b';
-              link.style.textDecoration = 'none';
-            });
-            
-            link.addEventListener('mouseleave', () => {
-              link.style.color = '#ed1922';
-              link.style.textDecoration = 'underline';
-            });
-            
-            return link;
-          }
-        }
-        
-        return document.createTextNode(location);
+
+        const container = document.createElement('span');
+        container.textContent = location + " ";
+
+        // botón "Ver en Maps"
+        const btn = document.createElement('button');
+        btn.className = "map-btn";
+        btn.textContent = "Ver en Maps";
+        btn.addEventListener('click', () => {
+          window.open(
+            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`,
+            '_blank'
+          );
+        });
+
+        container.appendChild(btn);
+        return container;
       }
 
-      // Crear el contenido
       farmInfoDiv.appendChild(document.createTextNode('NAME: ' + (farm.name || 'N/A') + '\n'));
       farmInfoDiv.appendChild(document.createTextNode('SUPPLIER: ' + (farm.supplier || 'N/A') + '\n'));
-      
-      // Para LOCATION, agregar el texto y luego el enlace si es coordenada
+
       farmInfoDiv.appendChild(document.createTextNode('LOCATION: '));
       farmInfoDiv.appendChild(createLocationElement(farm.location));
       farmInfoDiv.appendChild(document.createTextNode('\n'));
-      
+
       farmInfoDiv.appendChild(document.createTextNode('FARM CODE: ' + (farm.farmCode || 'N/A') + '\n'));
       farmInfoDiv.appendChild(document.createTextNode('ORCHARD CODE: ' + (farm.orchardCode || 'N/A') + '\n'));
       farmInfoDiv.appendChild(document.createTextNode('RUC CODE: ' + (farm.rucCode || 'N/A')));
 
-      // Limpiar el contenedor de resultado y agregar el nuevo contenido
       resultado.innerHTML = '';
       resultado.appendChild(farmInfoDiv);
       resultado.classList.add('show');
