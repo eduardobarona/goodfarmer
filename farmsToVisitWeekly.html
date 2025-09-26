@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoodFarmer - Farm Quality Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 20px auto;
+            max-width: 180px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(255,255,255,0.2));
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.8em;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .weekly-analysis {
+            margin-bottom: 30px;
+        }
+
+        .weekly-header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.4em;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weekly-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .week-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label::before {
+            content: '📅';
+            font-size: 1.2em;
+        }
+
+        select {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        select:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .search-week-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-week-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-week-btn:active {
+            transform: translateY(0);
+        }
+
+        .search-week-btn::before {
+            content: '🔍';
+            margin-right: 8px;
+        }
+
+        .loading-weekly {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            font-size: 1.1em;
+            color: #6c757d;
+            border: 2px dashed #dee2e6;
+        }
+
+        .loading-weekly::before {
+            content: '📊';
+            display: block;
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .bad-week-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+            position: relative;
+        }
+
+        .bad-week-header h3 {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .visit-note {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .bad-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-stat {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stat-label {
+            display: block;
+            color: #6c757d;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #dc3545;
+        }
+
+        .priority-farm-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .priority-farm-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: #ffc107;
+        }
+
+        .priority-farm-card.critical::before { background: #dc3545; }
+        .priority-farm-card.high::before { background: #fd7e14; }
+        .priority-farm-card.medium::before { background: #ffc107; }
+
+        .priority-farm-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .farm-priority-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .priority-rank {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .farm-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+         .farm-code {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .severity-score {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .farm-details {
+            display: flex;
+            gap: 20px;
+            color: #6c757d;
+            font-size: 0.95em;
+        }
+
+        .bad-containers-detail {
+            margin-top: 40px;
+        }
+
+        .bad-containers-detail h4 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .containers-table {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        .bad-containers-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .bad-containers-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bad-containers-table th:first-child {
+            border-top-left-radius: 15px;
+        }
+
+        .bad-containers-table th:last-child {
+            border-top-right-radius: 15px;
+        }
+
+        .bad-containers-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9em;
+        }
+
+        .bad-containers-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .bad-containers-table tr:last-child td:first-child {
+            border-bottom-left-radius: 15px;
+        }
+
+        .bad-containers-table tr:last-child td:last-child {
+            border-bottom-right-radius: 15px;
+        }
+
+        .container-id {
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .supplier {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .metric-high {
+            color: #dc3545;
+            font-weight: 700;
+            background: rgba(220, 53, 69, 0.1);
+            padding: 3px 8px;
+            border-radius: 15px;
+        }
+
+        .metric-low {
+            color: #fd7e14;
+            font-weight: 700;
+            background: rgba(253, 126, 20, 0.1);
+            padding: 3px 8px;
+            border-radius: 15px;
+        }
+
+        .failure-reason {
+            background: rgba(220, 53, 69, 0.1);
+            color: #721c24;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .severity-critical {
+            background: rgba(220, 53, 69, 0.05);
+            border-left: 4px solid #dc3545;
+        }
+
+        .severity-high {
+            background: rgba(253, 126, 20, 0.05);
+            border-left: 4px solid #fd7e14;
+        }
+
+        .severity-medium {
+            background: rgba(255, 193, 7, 0.05);
+            border-left: 4px solid #ffc107;
+        }
+
+        .no-containers {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-radius: 15px;
+            color: #155724;
+        }
+
+        .no-containers h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .no-containers::before {
+            content: '✅';
+            display: block;
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-radius: 15px;
+            color: #721c24;
+            border: 2px solid #f1b0b7;
+        }
+
+        .error-message::before {
+            content: '⚠️';
+            display: block;
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .farms-priority-list h4 {
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2.2em;
+            }
+
+            .bad-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .farm-priority-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .farm-details {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .bad-containers-table {
+                font-size: 0.8em;
+            }
+
+            .bad-containers-table th,
+            .bad-containers-table td {
+                padding: 10px 8px;
+            }
+        }
+
+        /* Loading animation */
+        .loading-weekly {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Focus styles for accessibility */
+        select:focus,
+        button:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="GoodFarmer Logo" class="logo" />
+        <h1>GOODFARMER</h1>
+        <div class="subtitle">Farm Quality Analysis Dashboard</div>
+    </div>
+
+    <div class="container">
+        <div class="weekly-analysis">
+            <div class="weekly-header">
+                <i class="fas fa-chart-line"></i> Weekly Quality Issues & Farm Visit Priority
+            </div>
+            
+            <div class="week-selector">
+                <label for="badWeekSelect">Select Inspection Week:</label>
+                <select id="badWeekSelect">
+                    <option value="">Select week...</option>
+                </select>
+                <button type="button" onclick="loadBadContainersByWeek()" class="search-week-btn">
+                    Analyze Quality Issues
+                </button>
+            </div>
+            
+            <div id="badWeekResults">
+                <div class="loading-weekly">Select a week to view quality issues and farm visit priorities</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            generateWeekOptions();
+        });
+
+        // Function to load bad containers by week
+        async function loadBadContainersByWeek() {
+            const weekSelect = document.getElementById('badWeekSelect');
+            const badResultsDiv = document.getElementById('badWeekResults');
+            const selectedWeek = weekSelect.value;
+            
+            if (!selectedWeek) {
+                badResultsDiv.innerHTML = '<div class="loading-weekly">Select a week to view bad containers</div>';
+                return;
+            }
+            
+            badResultsDiv.innerHTML = '<div class="loading-weekly">Loading bad containers...</div>';
+            
+            try {
+                const apiUrl = `https://eduardobarona14.pythonanywhere.com/contenedores_malos_semana?semana=${selectedWeek}&limit=20`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.error) {
+                    badResultsDiv.innerHTML = `<div class="error-message">${data.error}</div>`;
+                    return;
+                }
+                
+                if (data.total_bad_containers === 0) {
+                    badResultsDiv.innerHTML = `
+                        <div class="no-containers">
+                            <h3>Week ${selectedWeek} - No Quality Issues Found!</h3>
+                            <p>All ${data.total_containers_inspected} containers inspected passed quality standards.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                displayBadContainers(data);
+                
+            } catch (error) {
+                badResultsDiv.innerHTML = `<div class="error-message">Error loading data: ${error.message}</div>`;
+            }
+        }
+
+        function displayBadContainers(data) {
+            const badResultsDiv = document.getElementById('badWeekResults');
+            
+            let html = `
+                <div class="bad-week-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Week ${data.semana} Quality Issues Report</h3>
+                    <p>${data.total_bad_containers} problematic containers found (out of ${data.containers_with_quality_data} inspected)</p>
+                    <div class="visit-note">
+                        <i class="fas fa-calendar-check"></i> <strong>Action:</strong> ${data.note}
+                    </div>
+                </div>
+                
+                <div class="bad-summary">
+                    <div class="summary-stat">
+                        <span class="stat-label"><i class="fas fa-tractor"></i> Farms Affected</span>
+                        <span class="stat-value bad">${data.summary.farms_affected}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="stat-label"><i class="fas fa-thermometer-half"></i> Avg Severity</span>
+                        <span class="stat-value bad">${data.summary.avg_severity}</span>
+                    </div>
+                </div>
+                
+                <div class="bad-containers-section">
+                    <div class="farms-priority-list">
+                        <h4><i class="fas fa-sort-amount-down"></i> Priority Farms to Visit (Ranked by Severity)</h4>
+            `;
+            
+            // Top farms ranking
+            data.fincas_ranking.forEach((farm, index) => {
+                const priorityClass = farm.avg_severity >= 25 ? 'critical' : 
+                                     farm.avg_severity >= 15 ? 'high' : 'medium';
+                
+                html += `
+                    <div class="priority-farm-card ${priorityClass}">
+                        <div class="farm-priority-header">
+                            <span class="priority-rank">#${index + 1}</span>
+                            <span class="farm-name">${farm.farm_name} - ${farm.farm_code}</span>
+                            <span class="severity-score">${farm.avg_severity}</span>
+                        </div>
+                        <div class="farm-details">
+                            <span><i class="fas fa-box"></i> ${farm.exporter}</span>
+                            <span><i class="fas fa-box"></i> ${farm.bad_containers} bad containers</span>
+                            <span><i class="fas fa-exclamation-circle"></i> Worst: ${farm.worst_container.failure_reason}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+                
+                <div class="bad-containers-detail">
+                    <h4><i class="fas fa-list"></i> Individual Container Issues</h4>
+                    <div class="containers-table">
+                        <table class="bad-containers-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-barcode"></i> Container</th>
+                                    <th><i class="fas fa-building"></i> Supplier</th>
+                                    <th><i class="fas fa-tractor"></i> Farm</th>
+                                    <th><i class="fas fa-virus"></i> Fungus %</th>
+                                    <th><i class="fas fa-bandage"></i> Bruises %</th>
+                                    <th><i class="fas fa-weight"></i> Weight</th>
+                                    <th><i class="fas fa-exclamation-triangle"></i> Issues</th>
+                                    <th><i class="fas fa-thermometer-half"></i> Severity</th>
+                                    <th><i class="fas fa-user-check"></i> Inspector</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            // Individual containers
+            data.contenedores_malos.forEach(container => {
+                const severityClass = container.severity_score >= 25 ? 'critical' : 
+                                     container.severity_score >= 15 ? 'high' : 'medium';
+                
+                html += `
+                    <tr class="severity-${severityClass}">
+                        <td class="container-id">${container.container_id}</td>
+                        <td class="supplier">${container.exporter}</td>
+                        <td>${container.farm_name}</td>
+                        <td class="${container.fungus_percentage > 3 ? 'metric-high' : ''}">${container.fungus_percentage}%</td>
+                        <td class="${container.bruises_percentage > 35 ? 'metric-high' : ''}">${container.bruises_percentage}%</td>
+                        <td class="${container.weight < 14 ? 'metric-low' : ''}">${container.weight} kg</td>
+                        <td class="failure-reason">${container.failure_reason}</td>
+                        <td class="severity-score">${container.severity_score}</td>
+                        <td>${container.reviewed_by_technician}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            badResultsDiv.innerHTML = html;
+        }
+
+        async function generateWeekOptions() {
+            const select = document.getElementById('badWeekSelect');
+            if (!select) return;
+            
+            try {
+                const response = await fetch('https://eduardobarona14.pythonanywhere.com/semanas_disponibles');
+                const data = await response.json();
+                
+                select.innerHTML = '<option value="">Loading weeks...</option>';
+                
+                if (data.semanas_disponibles && data.semanas_disponibles.length > 0) {
+                    select.innerHTML = '<option value="">Select week...</option>';
+                    
+                    data.semanas_disponibles.forEach(week => {
+                        const option = document.createElement('option');
+                        option.value = week.week;
+                        
+                        option.textContent = `Week ${week.week} (${week.containers_with_quality_data} inspected, ${week.containers_with_problems} problems, ${week.problem_rate}%)`;
+                        select.appendChild(option);
+                    });
+                    
+                    // Select latest week
+                    const latestWeek = Math.max(...data.semanas_disponibles.map(w => w.week));
+                    select.value = latestWeek;
+                    
+                } else {
+                    select.innerHTML = '<option value="">No inspection data available</option>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading available weeks:', error);
+                select.innerHTML = '<option value="">Error loading weeks</option>';
+            }
+        }
+
+        // Helper function to get week number
+        Date.prototype.getWeek = function() {
+            const onejan = new Date(this.getFullYear(), 0, 1);
+            return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+        };
+
+        // Make functions globally available
+        window.openPhotoModal = function(src) {
+            // Implementation for photo modal if needed
+        };
+    </script>
+</body>
+</html>
