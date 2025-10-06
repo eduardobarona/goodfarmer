@@ -761,7 +761,7 @@
 <script>
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  generateWeekOptions();
+// generateWeekOptions();
 });
 </script>
 
@@ -1104,6 +1104,18 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
+    async function captureChartAsImage(chartId) {
+      const canvas = document.getElementById(chartId);
+      if (!canvas) return null;
+      
+      try {
+        return canvas.toDataURL('image/png', 1.0);
+      } catch (error) {
+        console.error(`Error capturing chart ${chartId}:`, error);
+        return null;
+      }
+    }
+
     async function generatePDFReport() {
   if (!currentAnalysisData || !currentFarmData) {
     alert('No analysis data available to download');
@@ -1398,19 +1410,95 @@ doc.text(`Report Generated: ${new Date().toLocaleDateString()}`, 105, 250, { ali
     }
 
     createBadContainersTable();
+
+    // AGREGAR CHARTS AL PDF
+const chartsSection = document.getElementById('chartsSection');
+if (chartsSection) {
+  doc.addPage();
+  addCleanHeader();
+  
+  // Título verde de la sección
+  doc.setFillColor(40, 167, 69);
+  doc.rect(10, yPos, 190, 35, 'F');
+  doc.setFontSize(24);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(undefined, 'bold');
+  doc.text('HISTORICAL QUALITY CHARTS', 105, yPos + 20, { align: 'center' });
+  yPos += 50;
+  
+  const chartIds = [
+    { id: 'goodVsBadChart', title: 'Good vs Bad Containers' },
+    { id: 'fungusChart', title: 'Fungus Level Trend' },
+    { id: 'bruisesChart', title: 'Bruises Level Trend' },
+    { id: 'weightChart', title: 'Weight Trend' },
+    { id: 'problemsChart', title: 'Problem Distribution' },
+    { id: 'qualityChart', title: 'Quality Percentage' }
+  ];
+
+  // Nueva variable para controlar página
+  let page = 1;
+
+  for (const chart of chartIds) {
+    const chartImage = await captureChartAsImage(chart.id);
+
+    if (chartImage) {
+      // Si se pasa del límite inferior, agregar nueva página
+      if (yPos > 200) {
+        doc.addPage();
+        addCleanHeader();
+        yPos = 40; // margen superior de nueva página
+        page++;
+      }
+
+      // Título del gráfico
+      doc.setFillColor(248, 249, 250);
+      doc.rect(10, yPos, 190, 15, 'F');
+      doc.setFontSize(14);
+      doc.setTextColor(60, 60, 60);
+      doc.setFont(undefined, 'bold');
+      doc.text(chart.title, 105, yPos + 10, { align: 'center' });
+      yPos += 20;
+
+      try {
+        // === Ajustes nuevos: centrado y tamaño automático ===
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const imgWidth = 140; // ajusta a tu gusto
+        const imgHeight = 80; // ajusta proporcionalmente
+        const xCentered = (pageWidth - imgWidth) / 2;
+
+        // Si es la primera página, dejar más margen por el encabezado
+        if (page === 1 && yPos < 60) {
+          yPos = 60;
+        }
+
+        // Agregar imagen centrada
+        doc.addImage(chartImage, 'PNG', xCentered, yPos, imgWidth, imgHeight);
+        yPos += imgHeight + 15;
+
+      } catch (error) {
+        console.error(`Error adding chart ${chart.id} to PDF:`, error);
+      }
+    }
+  }
+}
+
     
     // CONTENEDORES CON FOTOS
     if (weeklyData.length > 0) {
       const weekSelect = document.getElementById('weekSelect');
-      const selectedWeek = weekSelect?.value || availableWeeks[availableWeeks.length - 1];
+      const selectedWeek = weekSelect?.value;
+
+      // Solo incluir fotos si el usuario realmente seleccionó y buscó una semana
+      const weeklyResults = document.getElementById('weeklyResults');
+      const hasSearchedWeek = weeklyResults && !weeklyResults.querySelector('.loading-weekly');
       
-      if (selectedWeek) {
+      if (selectedWeek && hasSearchedWeek) {
         const weekContainers = weeklyData.filter(item => item.semana === selectedWeek);
         const uniqueContainers = weekContainers.filter((container, index, self) => 
           index === self.findIndex(c => c.contenedor === container.contenedor)
         );
         
-        for (let i = 0; i < Math.min(uniqueContainers.length, 3); i++) {
+        for (let i = 0; i < Math.min(uniqueContainers.length, 4); i++) {
           const container = uniqueContainers[i];
           
           doc.addPage();
@@ -1693,7 +1781,7 @@ loadHistoricalData(farmData.name).then(historicalData => {
     // Render charts after DOM insertion
     setTimeout(() => {
       console.log('CHARTS DEBUG: Rendering charts...');
-      renderCharts(historicalData);
+      renderCharts(historicalData, jsonData);
     }, 100);
   } else {
     console.log('CHARTS DEBUG: No historical data available, charts not created');
@@ -2452,7 +2540,7 @@ loadHistoricalData(farmData.name).then(historicalData => {
         return chartsSection;
       }
 
-      function renderCharts(historicalData) {
+      function renderCharts(historicalData, farmAnalysisData) {
         if (!historicalData || historicalData.length === 0) {
           console.log('No historical data available for charts');
           return;
@@ -2603,36 +2691,47 @@ loadHistoricalData(farmData.name).then(historicalData => {
           });
         }
         
-        // Chart 5: Problems Distribution (Pie Chart)
-        const ctx5 = document.getElementById('problemsChart');
-        if (ctx5) {
-          const totalFungus = historicalData.reduce((sum, item) => sum + (item.fungus_issues || 0), 0);
-          const totalBruises = historicalData.reduce((sum, item) => sum + (item.bruises_issues || 0), 0);
-          const totalWeight = historicalData.reduce((sum, item) => sum + (item.weight_issues || 0), 0);
-          
-          new Chart(ctx5, {
-            type: 'doughnut',
-            data: {
-              labels: ['Fungus Issues', 'Bruises Issues', 'Weight Issues'],
-              datasets: [{
-                data: [totalFungus, totalBruises, totalWeight],
-                backgroundColor: ['#fd7e14', '#6f42c1', '#20c997'],
-                borderWidth: 2,
-                borderColor: '#fff'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'bottom',
-                }
-              }
+        // Chart 5: Problems Distribution (Pie Chart) - CORREGIDO
+const ctx5 = document.getElementById('problemsChart');
+if (ctx5) {
+  // USA LOS DATOS DEL ENDPOINT /analizar_json QUE YA TIENES CARGADO
+  const totalFungus = farmAnalysisData.bad_containers.by_fungus || 0;
+  const totalBruises = farmAnalysisData.bad_containers.by_bruises || 0;
+  const totalWeight = farmAnalysisData.bad_containers.by_weight || 0;
+  
+  new Chart(ctx5, {
+    type: 'doughnut',
+    data: {
+      labels: ['Fungus Issues', 'Bruises Issues', 'Weight Issues'],
+      datasets: [{
+        data: [totalFungus, totalBruises, totalWeight],
+        backgroundColor: ['#fd7e14', '#6f42c1', '#20c997'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = totalFungus + totalBruises + totalWeight;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+              return `${label}: ${value} containers (${percentage}%)`;
             }
-          });
+          }
         }
-        
+      }
+    }
+  });
+}
         // Chart 6: Quality Percentage by Week
         const ctx6 = document.getElementById('qualityChart');
         if (ctx6) {

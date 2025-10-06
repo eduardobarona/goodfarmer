@@ -588,9 +588,11 @@
             border-radius: 10px;
             margin-bottom: 25px;
             text-align: center;
-            font-size: 1.4em;
+            font-size: 1.4em;   
             font-weight: bold;
         }
+
+/* Cambiar el contenido del encabezado modificando el innerHTML en el HTML */
 
         .high-bruises-farm-card {
             background: white;
@@ -726,6 +728,9 @@
                 <button type="button" onclick="loadBadContainersByWeek()" class="search-week-btn">
                     Analyze Quality Issues
                 </button>
+                <a href="./pruebadepredicion.html" target="_blank">
+                    <button class="search-week-btn">View More In Details (Another Page)</button>
+                </a>
             </div>
             
             <div id="badWeekResults">
@@ -773,7 +778,7 @@
             badResultsDiv.innerHTML = '<div class="loading-weekly">Loading bad containers...</div>';
             
             try {
-                const apiUrl = `https://eduardobarona14.pythonanywhere.com/contenedores_malos_semana?semana=${selectedWeek}&limit=20`;
+                const apiUrl = `https://eduardobarona.pythonanywhere.com/contenedores_malos_semana?semana=${selectedWeek}&limit=20`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
@@ -808,7 +813,7 @@ async function loadOverallSummary() {
     overallResults.innerHTML = '<div class="loading-summary">Loading overall farm quality data...</div>';
     
     try {
-        const response = await fetch('https://eduardobarona14.pythonanywhere.com/top_peores_fincas_general');
+        const response = await fetch('https://eduardobarona.pythonanywhere.com/top_peores_fincas_general');
         const data = await response.json();
         
         if (data.error) {
@@ -877,7 +882,7 @@ async function loadHighBruisesFarms() {
     bruisesResults.innerHTML = '<div class="loading-summary">Loading high bruises data...</div>';
     
     try {
-        const response = await fetch('https://eduardobarona14.pythonanywhere.com/fincas_alto_bruises');
+        const response = await fetch('https://eduardobarona.pythonanywhere.com/fincas_alto_bruises');
         const data = await response.json();
         
         if (data.error) {
@@ -892,16 +897,20 @@ async function loadHighBruisesFarms() {
     }
 }
 
+// Actualizar la función displayHighBruisesFarms en tu HTML:
 function displayHighBruisesFarms(data) {
     const bruisesResults = document.getElementById('bruisesResults');
     let html = '';
     
     if (data.high_bruises_farms.length === 0) {
-        html = '<div class="no-data">No farms found with >25% high bruises rate</div>';
+        html = '<div class="no-data">No farms found with average bruises >20%</div>';
     } else {
         html = `
             <div style="text-align: center; margin-bottom: 20px; font-weight: bold; color: #856404;">
-                Found ${data.total_problematic_farms} farms with bruises rate above 25%
+                Found ${data.total_problematic_farms} farms with average bruises above 20%
+                <div style="font-size: 0.9em; font-weight: normal; margin-top: 5px;">
+                    ${data.explanation}
+                </div>
             </div>
         `;
         
@@ -913,7 +922,7 @@ function displayHighBruisesFarms(data) {
                             <strong>#${index + 1} ${farm.farm_name}</strong>
                             <div style="font-size: 0.8em; color: #6c757d;">${farm.exporter} - Code: ${farm.farm_code}</div>
                         </div>
-                        <div class="bruises-rate-badge">${farm.bruises_rate}%</div>
+                        <div class="bruises-rate-badge">${farm.avg_bruises}% avg</div>
                     </div>
                     <div class="bruises-stats">
                         <div class="bruises-stat">
@@ -921,12 +930,12 @@ function displayHighBruisesFarms(data) {
                             <div>Total Containers</div>
                         </div>
                         <div class="bruises-stat">
-                            <div style="font-weight: bold; color: #dc3545;">${farm.high_bruises_containers}</div>
-                            <div>High Bruises</div>
+                            <div style="font-weight: bold; color: #dc3545;">${farm.avg_bruises}%</div>
+                            <div>Avg Bruises</div>
                         </div>
                         <div class="bruises-stat">
-                            <div style="font-weight: bold;">${farm.avg_bruises}%</div>
-                            <div>Avg Bruises</div>
+                            <div style="font-weight: bold;">${farm.min_bruises}%</div>
+                            <div>Min Bruises</div>
                         </div>
                         <div class="bruises-stat">
                             <div style="font-weight: bold; color: #dc3545;">${farm.max_bruises}%</div>
@@ -940,7 +949,6 @@ function displayHighBruisesFarms(data) {
     
     bruisesResults.innerHTML = html;
 }
-
 
         function displayBadContainers(data) {
             const badResultsDiv = document.getElementById('badWeekResults');
@@ -1055,7 +1063,7 @@ function displayHighBruisesFarms(data) {
             if (!select) return;
             
             try {
-                const response = await fetch('https://eduardobarona14.pythonanywhere.com/semanas_disponibles');
+                const response = await fetch('https://eduardobarona.pythonanywhere.com/semanas_disponibles');
                 const data = await response.json();
                 
                 select.innerHTML = '<option value="">Loading weeks...</option>';
@@ -1067,7 +1075,7 @@ function displayHighBruisesFarms(data) {
                         const option = document.createElement('option');
                         option.value = week.week;
                         
-                        option.textContent = `Week ${week.week} (${week.containers_with_quality_data} inspected, ${week.containers_with_problems} problems, ${week.problem_rate}%)`;
+                        option.textContent = `Week ${week.week} `;
                         select.appendChild(option);
                     });
                     
