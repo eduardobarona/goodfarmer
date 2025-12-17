@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoodFarmer Asignador (PDF + Lista Negra)</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; padding: 20px; color: #0f172a; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h1 { color: #0f172a; font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .layout { display: grid; grid-template-columns: 320px 1fr; gap: 25px; }
+        .panel { background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; height: fit-content; }
+        label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #475569; }
+        select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; height: 180px; margin-bottom: 15px; font-size: 12px; }
+        textarea { width: 100%; padding: 8px; border: 1px solid #94a3b8; border-radius: 6px; height: 80px; margin-bottom: 5px; font-size: 12px; font-family: monospace; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-bottom: 10px; font-size: 14px; transition: 0.2s; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-search { background: #4f46e5; color: white; margin-bottom: 15px; padding: 8px; font-size: 12px; }
+        .btn-download { background: #ef4444; color: white; } /* PDF rojo */
+        .btn-download:hover { background: #dc2626; }
+        
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 15px; align-content: start; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+        .card:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transform: translateY(-2px); }
+        .card-header { padding: 12px 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .tech-name { font-weight: 700; font-size: 15px; color: #334155; }
+        .badge { background: #3b82f6; color: white; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+        .farm-item { padding: 8px 12px; border-bottom: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 8px; }
+        .farm-info { flex-grow: 1; overflow: hidden; }
+        .farm-info div:first-child { font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .farm-info div:last-child { font-size: 11px; color: #64748b; }
+        .time-badge { font-weight: 700; color: #059669; font-size: 11px; background: #ecfdf5; padding: 2px 5px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+        
+        .tech-changer { width: 100px; height: 24px; padding: 0 4px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px; background-color: #fff; color: #334155; cursor: pointer; }
+        .tech-changer:hover { border-color: #3b82f6; }
+
+        .tag { font-weight: bold; font-size: 9px; padding: 1px 3px; border-radius: 3px; margin-left: 4px; border: 1px solid; }
+        .vip-tag { color: #dc2626; border-color: #dc2626; }
+        .special-tag { color: #7e22ce; border-color: #7e22ce; }
+        .bridge-tag { color: #0891b2; border-color: #0891b2; }
+        .black-tag { background: #000; color: #fff; border-color: #000; } /* Lista Negra */
+        
+        #overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 50; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        .progress-container { width: 300px; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-top: 15px; }
+        .progress-bar { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s; }
+        #status-percent { font-size: 24px; font-weight: bold; color: #2563eb; }
+        #status-text { color: #64748b; margin-top: 5px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <div id="status-percent">0%</div>
+    <div class="progress-container"><div id="progress-bar" class="progress-bar"></div></div>
+    <div id="status-text">Cargando...</div>
+</div>
+
+<div class="container">
+    <h1>🚀 GoodFarmer Asignador</h1>
+    
+    <div class="layout">
+        <div class="panel">
+            <label>1. Técnicos</label>
+            <select id="techSelect" multiple style="height: 120px;"></select>
+            
+            <label style="color:#2563eb">⚡ Pegar Lista</label>
+            <textarea id="pasteArea" placeholder="Pegar lista aquí..."></textarea>
+            <button onclick="autoSelectFarms()" class="btn btn-search">🔍 Auto-Seleccionar</button>
+
+            <label>2. Fincas Seleccionadas</label>
+            <select id="farmSelect" multiple style="height: 150px;" onchange="updatePrioList()"></select>
+
+            <label style="color:#dc2626">3. Prioridad (VIP)</label>
+            <select id="prioSelect" multiple style="height: 100px; border-color:#fca5a5; background:#fff1f2; color: #b91c1c;"></select>
+            <div style="font-size:10px; color:#991b1b; margin-bottom: 15px; margin-top:-10px;">* Clic para marcar urgentes.</div>
+            
+            <button onclick="runProcess()" class="btn btn-primary">⚡ Calcular</button>
+            <button onclick="exportPDF()" class="btn btn-download">📄 Descargar PDF</button>
+            
+            <div style="margin-top: 15px; font-size: 11px; color: #64748b; line-height: 1.4;">
+                <p>🌉 <strong>Puente El Oro:</strong> 5 min interno.</p>
+                <p>🚫 <strong>Lista Negra:</strong> Fincas prohibidas van a Sin Asignar.</p>
+                <p>📄 <strong>PDF:</strong> Genera reporte con fecha de mañana.</p>
+            </div>
+        </div>
+
+        <div id="results" class="results-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8;">Cargando datos...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let DB = { techs: [], farms: [] };
+    let FINAL_DATA = null;
+    let API_BLOCKED = false;
+
+    // --- CONFIGURACIÓN ---
+    const MAX_FROM_HOME = 120;
+    const MAX_BETWEEN_FARMS = 45;
+    
+    // LISTA NEGRA (Prohibidas)
+    const BLACKLIST = [
+        "VICTORIA 2",
+        "FLORIDA",
+        "SAN MIGUEL"
+    ];
+
+    const TECH_TARGETS = {
+        "JERRY": ["TADURA", "COLON 1", "KRAPP"],
+        "JORDY": ["BEJUCAL 3"],
+        "DARWIN": ["MARTINICA 1", "MARTINICA 2", "MARTINICA 3"],
+        "ANDRÉS": ["SARITA"] 
+    };
+
+    const SPECIAL_PINAS_GROUP = [
+        "CEDRALES", "EL GARZAL", "LA LUZ", 
+        "PEPA DE ORO", "TIJUCA", "TIERRA VERDE"
+    ];
+
+    const BRIDGE_FARMS = [
+        "JENNY ELIZABETH 1", "JENNY ELIZABETH 2", "JENNY ELIZABETH 3", "JENNY ELIZABETH 4",
+        "ISAIAS", "XAVIER EUCLIDES"
+    ];
+
+    // --- UTILS ---
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    function isBlacklisted(farmName) {
+        if (!farmName) return false;
+        return BLACKLIST.some(b => farmName.toUpperCase().includes(b));
+    }
+
+    function isSpecialPinas(farmName) {
+        if (!farmName) return false;
+        return SPECIAL_PINAS_GROUP.some(p => farmName.toUpperCase().includes(p));
+    }
+
+    function isBridgeFarm(farmName) {
+        if (!farmName) return false;
+        return BRIDGE_FARMS.some(b => farmName.toUpperCase().includes(b));
+    }
+
+    function getTechTarget(farmName) {
+        if (!farmName) return null;
+        for (const [tech, targets] of Object.entries(TECH_TARGETS)) {
+            if (targets.some(t => farmName.toUpperCase().includes(t))) return tech;
+        }
+        return null;
+    }
+
+    function isAllowed(techName, supplier) {
+        if (!techName || !supplier) return true;
+        if (techName.toUpperCase().includes("GUSTAVO") && supplier.toUpperCase().includes("DUREXPORTA")) return false;
+        return true;
+    }
+
+    function parseCoords(str) {
+        if (!str || typeof str !== "string") return null;
+        str = str.replace(/"+/g, '').trim().replace(/\s+/g, ' ');
+        if (str.length < 5) return null;
+        try {
+            if (str.match(/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/)) return { lat: parseFloat(str.split(',')[0]), lng: parseFloat(str.split(',')[1]) };
+            const m = str.match(/(\d+)[°º]\s*(\d+)'?\s*(\d+(?:\.\d+)?)"?\s*([NS])[\s,]+(\d+)[°º]\s*(\d+)'?\s*(\d+(?:\.\d+)?)"?\s*([EW])/i);
+            if (m) {
+                let lat = parseFloat(m[1]) + parseFloat(m[2])/60 + parseFloat(m[3])/3600;
+                let lng = parseFloat(m[5]) + parseFloat(m[6])/60 + parseFloat(m[7])/3600;
+                if (m[4].toUpperCase() === 'S') lat *= -1;
+                if (m[8].toUpperCase() === 'W') lng *= -1;
+                return { lat, lng };
+            }
+        } catch (e) { return null; }
+        return null;
+    }
+
+    function getDistKm(c1, c2) {
+        if (!c1 || !c2) return 99999;
+        const R = 6371; 
+        const dLat = (c2.lat - c1.lat) * Math.PI / 180;
+        const dLng = (c2.lng - c1.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(c1.lat * Math.PI/180) * Math.cos(c2.lat * Math.PI/180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // --- API ---
+    const cache = new Map();
+    async function getApiTime(c1, c2) {
+        if (!c1 || !c2) return 999;
+        const km = getDistKm(c1, c2);
+        const mathEstimate = km * 1.25; 
+        if (API_BLOCKED || km > 150) return mathEstimate;
+        const key = `${c1.lat},${c1.lng}-${c2.lat},${c2.lng}`;
+        if (cache.has(key)) return cache.get(key);
+        try {
+            await wait(80); 
+            const controller = new AbortController();
+            setTimeout(() => controller.abort(), 1500); 
+            const url = `https://router.project-osrm.org/route/v1/driving/${c1.lng},${c1.lat};${c2.lng},${c2.lat}?overview=false`;
+            const res = await fetch(url, { signal: controller.signal });
+            if (res.status === 429) { await wait(2000); return mathEstimate; }
+            if (res.ok) {
+                const d = await res.json();
+                if (d.routes && d.routes.length) {
+                    const min = d.routes[0].duration / 60;
+                    cache.set(key, min);
+                    return min;
+                }
+            }
+        } catch(e) { API_BLOCKED = true; }
+        return mathEstimate;
+    }
+
+    async function calculateSmartTime(fromCoords, fromName, toFarm) {
+        if (fromName && isBridgeFarm(fromName) && isBridgeFarm(toFarm.name)) {
+            return 5; 
+        }
+        return await getApiTime(fromCoords, toFarm.coords);
+    }
+
+    // --- CORE ALGORITHM ---
+    async function runAlgorithm(techs, farms, prioIds) {
+        API_BLOCKED = false;
+        const assignments = {};
+        techs.forEach(t => assignments[t.name] = []);
+        const unassignedList = [];
+
+        // 1. Preparar y FILTRAR LISTA NEGRA
+        const pinasFarms = [];
+        const regularFarms = [];
+        
+        farms.forEach(f => {
+            // CHECK LISTA NEGRA
+            if (isBlacklisted(f.name)) {
+                f.reason = "LISTA NEGRA";
+                unassignedList.push(f);
+            }
+            else if (!f.coords) {
+                f.reason = "SIN GPS";
+                unassignedList.push(f);
+            }
+            else if (isSpecialPinas(f.name)) pinasFarms.push(f);
+            else regularFarms.push(f);
+        });
+
+        // Agrupar Piñas
+        const pinasGroups = [];
+        const visitedPinas = new Set();
+        for (let i = 0; i < pinasFarms.length; i++) {
+            if (visitedPinas.has(pinasFarms[i].id)) continue;
+            let group = [pinasFarms[i]];
+            visitedPinas.add(pinasFarms[i].id);
+            while(group.length < 3) {
+                let bestIdx = -1;
+                let minDist = 9999;
+                let last = group[group.length-1];
+                for(let j=0; j<pinasFarms.length; j++) {
+                    if(visitedPinas.has(pinasFarms[j].id)) continue;
+                    let dist = getDistKm(last.coords, pinasFarms[j].coords);
+                    if (dist < minDist) { minDist = dist; bestIdx = j; }
+                }
+                if(bestIdx !== -1) {
+                    group.push(pinasFarms[bestIdx]);
+                    visitedPinas.add(pinasFarms[bestIdx].id);
+                } else break;
+            }
+            pinasGroups.push(group);
+        }
+
+        // FASE VIP SNIPER
+        updateProgress(10, "VIP Sniper...");
+        const vipFarms = regularFarms.filter(f => prioIds.has(f.id));
+        const normalFarms = regularFarms.filter(f => !prioIds.has(f.id));
+
+        for (const farm of vipFarms) {
+            let bestTech = null;
+            let bestMins = Infinity;
+
+            for (const tech of techs) {
+                if (!tech.coords) continue;
+                if (!isAllowed(tech.name, farm.supplier)) continue;
+
+                let startCoords = tech.coords;
+                let fromName = null;
+                if (assignments[tech.name].length > 0) {
+                    const last = assignments[tech.name][assignments[tech.name].length-1].farm;
+                    startCoords = last.coords;
+                    fromName = last.name;
+                }
+
+                const dist = await calculateSmartTime(startCoords, fromName, farm);
+                if (assignments[tech.name].length > 0 && dist > MAX_BETWEEN_FARMS) continue;
+
+                if (dist < bestMins) {
+                    bestMins = dist;
+                    bestTech = tech;
+                }
+            }
+
+            if (bestTech) {
+                assignments[bestTech.name].push({ farm: farm, mins: bestMins, vip: true });
+            } else {
+                normalFarms.push(farm);
+            }
+        }
+
+        // FASE PIÑAS
+        updateProgress(20, "Piñas Ricas...");
+        for (const group of pinasGroups) {
+            let bestTech = null;
+            let bestMins = Infinity;
+            for (const tech of techs) {
+                if (assignments[tech.name].length > 0) continue; 
+                const dist = await calculateSmartTime(tech.coords, null, group[0]);
+                if (dist < bestMins) { bestMins = dist; bestTech = tech; }
+            }
+            if (bestTech) {
+                let currCoords = bestTech.coords;
+                let prevName = null;
+                for (const f of group) {
+                    let t = await calculateSmartTime(currCoords, prevName, f);
+                    assignments[bestTech.name].push({ farm: f, mins: t, special: true });
+                    currCoords = f.coords;
+                    prevName = f.name;
+                }
+            } else {
+                group.forEach(f => normalFarms.push(f));
+            }
+        }
+
+        // FASE NORMAL
+        updateProgress(40, "Asignando...");
+        let availableFarms = [...normalFarms];
+        
+        while (availableFarms.length > 0) {
+            let bestGlobalMove = null;
+            let bestGlobalScore = Infinity;
+
+            for (let i = 0; i < availableFarms.length; i++) {
+                const farm = availableFarms[i];
+                const targetTech = getTechTarget(farm.name);
+
+                for (const tech of techs) {
+                    if (assignments[tech.name].length >= 3) continue;
+                    if (!isAllowed(tech.name, farm.supplier)) continue;
+                    if (targetTech && !tech.name.toUpperCase().includes(targetTech)) continue;
+                    if (assignments[tech.name].some(a => a.special)) continue;
+
+                    const currentLoad = assignments[tech.name].length;
+                    let startCoords = tech.coords;
+                    let fromName = null;
+                    if (currentLoad > 0) {
+                        const last = assignments[tech.name][currentLoad-1].farm;
+                        startCoords = last.coords;
+                        fromName = last.name;
+                    }
+
+                    const dist = await calculateSmartTime(startCoords, fromName, farm);
+
+                    if (currentLoad > 0 && dist > MAX_BETWEEN_FARMS) continue;
+                    if (currentLoad === 0 && dist > MAX_FROM_HOME && !farm.isVip) continue;
+
+                    let score = dist;
+                    if (currentLoad > 0 && dist < 15) score -= 50000; 
+                    if (currentLoad === 1) score += 2000; 
+                    if (currentLoad === 2) score += 5000;
+                    if (targetTech && tech.name.toUpperCase().includes(targetTech)) score -= 10000;
+                    if (currentLoad === 0) score -= 1000;
+
+                    if (score < bestGlobalScore) {
+                        bestGlobalScore = score;
+                        bestGlobalMove = { tech: tech, farmIdx: i, mins: dist };
+                    }
+                }
+            }
+
+            if (bestGlobalMove) {
+                const farm = availableFarms[bestGlobalMove.farmIdx];
+                const tech = bestGlobalMove.tech;
+                
+                assignments[tech.name].push({ 
+                    farm: farm, 
+                    mins: bestGlobalMove.mins, 
+                    vip: farm.isVip,
+                    bridge: isBridgeFarm(farm.name)
+                });
+                
+                availableFarms.splice(bestGlobalMove.farmIdx, 1);
+            } else {
+                break; 
+            }
+        }
+
+        availableFarms.forEach(f => {
+            f.reason = "Fuera de Rango";
+            unassignedList.push(f);
+        });
+
+        updateProgress(100, "Listo");
+        return { assignments, unassigned: unassignedList };
+    }
+
+    // --- PDF GENERATION ---
+    function exportPDF() {
+        if (!FINAL_DATA) return;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Fecha Mañana
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dateStr = tomorrow.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Header
+        doc.setFontSize(22);
+        doc.setTextColor(37, 99, 235); // Azul
+        doc.text("GoodFarmer", 14, 20);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text(`Distribución para: ${dateStr}`, 14, 30);
+
+        let yPos = 40;
+
+        // Ordenar técnicos por nombre
+        const techNames = Object.keys(FINAL_DATA.assignments).sort();
+
+        techNames.forEach(techName => {
+            const list = FINAL_DATA.assignments[techName];
+            if (list.length === 0) return;
+
+            // Título Técnico
+            doc.setFontSize(14);
+            doc.setTextColor(0);
+            doc.text(`${techName} (${list.length})`, 14, yPos);
+            yPos += 5;
+
+            // Tabla
+            const rows = list.map(item => [
+                item.farm.name + (item.vip ? ' [VIP]' : '') + (isBlacklisted(item.farm.name) ? ' [!]' : ''),
+                item.farm.supplier,
+                `~${Math.round(item.mins)} min`
+            ]);
+
+            doc.autoTable({
+                head: [['Finca', 'Proveedor', 'Tiempo']],
+                body: rows,
+                startY: yPos,
+                theme: 'grid',
+                headStyles: { fillColor: [59, 130, 246] }, // Azul
+                styles: { fontSize: 10 },
+                margin: { left: 14 }
+            });
+
+            yPos = doc.lastAutoTable.finalY + 15;
+            
+            // Salto de página si es necesario
+            if (yPos > 270) {
+                doc.addPage();
+                yPos = 20;
+            }
+        });
+
+        // Sección Sin Asignar
+        if (FINAL_DATA.unassigned.length > 0) {
+            if (yPos > 250) { doc.addPage(); yPos = 20; }
+            
+            doc.setFontSize(14);
+            doc.setTextColor(220, 38, 38); // Rojo
+            doc.text(`Sin Asignar (${FINAL_DATA.unassigned.length})`, 14, yPos);
+            yPos += 5;
+
+            const badRows = FINAL_DATA.unassigned.map(f => [
+                f.name,
+                f.supplier,
+                isBlacklisted(f.name) ? "No se puede visitar (Lista Negra)" : (f.reason || "Fuera de Rango")
+            ]);
+
+            doc.autoTable({
+                head: [['Finca', 'Proveedor', 'Motivo']],
+                body: badRows,
+                startY: yPos,
+                theme: 'striped',
+                headStyles: { fillColor: [220, 38, 38] },
+                styles: { fontSize: 10 },
+                margin: { left: 14 }
+            });
+        }
+
+        doc.save(`GoodFarmer_Rutas_${tomorrow.toISOString().split('T')[0]}.pdf`);
+    }
+
+    // --- UI/LOGIC ---
+    async function manualChange(farmName, oldTechName, newTechName) {
+        if (newTechName === "") return;
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('status-text').innerText = "Recalculando...";
+        try {
+            let itemToMove;
+            if (oldTechName === 'UNASSIGNED') {
+                const idx = FINAL_DATA.unassigned.findIndex(f => f.name === farmName);
+                if (idx === -1) throw new Error("Finca no encontrada");
+                const farm = FINAL_DATA.unassigned.splice(idx, 1)[0];
+                itemToMove = { farm: farm, mins: 0, vip: false, special: false };
+            } else {
+                const list = FINAL_DATA.assignments[oldTechName];
+                const idx = list.findIndex(i => i.farm.name === farmName);
+                if (idx === -1) throw new Error("Finca no encontrada");
+                itemToMove = list.splice(idx, 1)[0];
+                await recalculateRoute(oldTechName);
+            }
+
+            if (newTechName === 'UNASSIGNED') {
+                FINAL_DATA.unassigned.push(itemToMove.farm);
+            } else {
+                if (!FINAL_DATA.assignments[newTechName]) FINAL_DATA.assignments[newTechName] = [];
+                FINAL_DATA.assignments[newTechName].push(itemToMove);
+                await recalculateRoute(newTechName);
+            }
+            render();
+        } catch(e) { alert(e.message); } 
+        finally { document.getElementById('overlay').style.display = 'none'; }
+    }
+
+    async function recalculateRoute(techName) {
+        const list = FINAL_DATA.assignments[techName];
+        if (!list || list.length === 0) return;
+        const tech = DB.techs.find(t => t.name === techName);
+        let currCoords = tech.coords;
+        let prevName = null;
+        for (let item of list) {
+            item.mins = await calculateSmartTime(currCoords, prevName, item.farm);
+            currCoords = item.farm.coords;
+            prevName = item.farm.name;
+        }
+    }
+
+    function autoSelectFarms() {
+        const text = document.getElementById('pasteArea').value;
+        const lines = text.split(/\n/).map(l => l.trim().toUpperCase()).filter(l => l.length > 0);
+        const options = Array.from(document.getElementById('farmSelect').options);
+        let count = 0;
+        lines.forEach(line => {
+            for (let opt of options) {
+                if (opt.text.toUpperCase().includes(line)) {
+                    opt.selected = true;
+                    count++;
+                }
+            }
+        });
+        updatePrioList();
+        alert(`${count} seleccionadas.`);
+    }
+
+    function updatePrioList() {
+        const sel = document.getElementById('farmSelect');
+        const prio = document.getElementById('prioSelect');
+        prio.innerHTML = "";
+        Array.from(sel.selectedOptions).forEach(opt => {
+            if (DB.farms[opt.value]) prio.add(new Option(DB.farms[opt.value].name, opt.value));
+        });
+    }
+
+    function updateProgress(pct, text) {
+        document.getElementById('status-percent').innerText = pct + '%';
+        document.getElementById('progress-bar').style.width = pct + '%';
+        document.getElementById('status-text').innerText = text;
+    }
+
+    async function runProcess() {
+        const sTechs = Array.from(document.getElementById('techSelect').selectedOptions).map(o => DB.techs[o.value]);
+        const sFarms = Array.from(document.getElementById('farmSelect').selectedOptions).map(o => DB.farms[o.value]);
+        const prioIds = new Set(Array.from(document.getElementById('prioSelect').selectedOptions).map(o => DB.farms[o.value].id));
+
+        if (!sTechs.length || !sFarms.length) return alert("Faltan datos.");
+        document.getElementById('overlay').style.display = 'flex';
+        
+        try {
+            FINAL_DATA = await runAlgorithm(sTechs, sFarms, prioIds);
+            render();
+        } catch(e) { alert(e.message); }
+        finally { document.getElementById('overlay').style.display = 'none'; }
+    }
+
+    function render() {
+        const box = document.getElementById('results');
+        box.innerHTML = '';
+        const allTechs = Array.from(document.getElementById('techSelect').selectedOptions).map(o => o.text.replace(' ⚠️',''));
+        const techIndices = Array.from(document.getElementById('techSelect').selectedOptions).map(o => o.value);
+
+        techIndices.forEach(idx => {
+            const tech = DB.techs[idx];
+            const list = FINAL_DATA.assignments[tech.name] || [];
+            
+            let html = `
+            <div class="card">
+                <div class="card-header">
+                    <div><div class="tech-name">${tech.name}</div><div style="font-size:11px;color:#64748b">${tech.phone}</div></div>
+                    <div class="badge">${list.length} fincas</div>
+                </div><div style="min-height:30px">`;
+            
+            if(list.length===0) html+=`<div style="padding:15px;text-align:center;color:#94a3b8;font-size:12px">Sin asignaciones</div>`;
+            
+            list.forEach(i => {
+                let opts = `<option value="UNASSIGNED" style="color:red">❌ Quitar</option>`;
+                allTechs.forEach(t => opts += `<option value="${t}" ${t===tech.name?'selected':''}>${t}</option>`);
+                
+                html += `
+                <div class="farm-item">
+                    <div class="farm-info">
+                        <div>${i.farm.name} 
+                            ${i.vip?'<span class="tag vip-tag">VIP</span>':''}
+                            ${i.special?'<span class="tag special-tag">PIÑAS</span>':''}
+                            ${isBridgeFarm(i.farm.name)?'<span class="tag bridge-tag">PUENTE</span>':''}
+                        </div>
+                        <div>${i.farm.supplier}</div>
+                    </div>
+                    <div style="text-align:right">
+                        <select class="tech-changer" onchange="manualChange('${i.farm.name.replace(/'/g,"\\'")}','${tech.name}',this.value)">${opts}</select>
+                        <div class="time-badge" style="margin-top:4px">~${Math.round(i.mins)} min</div>
+                    </div>
+                </div>`;
+            });
+            html += `</div></div>`;
+            box.innerHTML += html;
+        });
+
+        if(FINAL_DATA.unassigned?.length) {
+            let html = `<div class="card"><div class="card-header" style="background:#fef2f2;border-color:#fecaca"><div class="tech-name" style="color:#ef4444">❌ Sin Asignar</div><div class="badge" style="background:#ef4444">${FINAL_DATA.unassigned.length}</div></div><div>`;
+            FINAL_DATA.unassigned.forEach(f => {
+                let opts = `<option value="">-- Asignar --</option>`;
+                allTechs.forEach(t => opts += `<option value="${t}">${t}</option>`);
+                html += `<div class="farm-item"><div class="farm-info"><div>${f.name} ${isBlacklisted(f.name)?'<span class="tag black-tag">PROHIBIDA</span>':''}</div><div>${f.reason||"Fuera de rango"}</div></div><div><select class="tech-changer" onchange="manualChange('${f.name.replace(/'/g,"\\'")}','UNASSIGNED',this.value)">${opts}</select></div></div>`;
+            });
+            html += `</div></div>`;
+            box.innerHTML += html;
+        }
+    }
+
+    async function load() {
+        try {
+            const tRaw = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_e-zu9dC1Pzk3XmaKAMP4YhntP2yJ87Tkn6-uQd1flmv7cuY2yjdpK6XTZMKyCd2Qw7Ux41V8dUKx/pub?gid=561586817&single=true&output=csv').then(r=>r.text());
+            DB.techs = tRaw.split('\n').slice(1).map((l, i) => { const r=l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); return {id:i, name:r[0].trim(), phone:r[2], coords:parseCoords(r[3])}});
+            const fRaw = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vS_e-zu9dC1Pzk3XmaKAMP4YhntP2yJ87Tkn6-uQd1flmv7cuY2yjdpK6XTZMKyCd2Qw7Ux41V8dUKx/pub?gid=2031029481&single=true&output=csv').then(r=>r.text());
+            DB.farms = fRaw.split('\n').slice(1).map((l, i) => { const r=l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); return {id:i, supplier:r[0].trim(), name:r[1].trim(), coords:parseCoords(r[2])}});
+            
+            const tSel = document.getElementById('techSelect');
+            const fSel = document.getElementById('farmSelect');
+            DB.techs.forEach((t,i) => tSel.add(new Option(t.name + (t.coords?'':' ⚠️'), i)));
+            DB.farms.forEach((f,i) => fSel.add(new Option(`${f.name} (${f.supplier})${f.coords?'':' ⚠️'}`, i)));
+            document.getElementById('overlay').style.display = 'none';
+        } catch(e) { alert("Error loading data"); }
+    }
+
+    window.onload = load;
+</script>
+</body>
+</html>
