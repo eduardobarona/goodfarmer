@@ -71,6 +71,31 @@
     }
   </style>
 </head>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmUv7lO9JvDkc40DNHGjstcYm8N508EPA",
+    authDomain: "goodfarmer-af4db.firebaseapp.com",
+    projectId: "goodfarmer-af4db",
+    storageBucket: "goodfarmer-af4db.firebasestorage.app",
+    messagingSenderId: "825592484658",
+    appId: "1:825592484658:web:f52f7b7d2ea8b486977d2b",
+    measurementId: "G-XVSJHN43Q3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+</script>
+
+
 <body>
 
   <img src="logo.png" alt="GoodFarmer Logo" class="logo" />
